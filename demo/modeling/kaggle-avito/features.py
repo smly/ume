@@ -87,30 +87,3 @@ def gen_y():
         'idx_train': idx_train,
         'idx_test': idx_test,
     }
-
-
-def gen_attrib():
-    df = pd.read_csv("./data/working/attrs.csv")
-    cols = [v for v in df.columns.tolist() if v != 'itemid']
-    X = None
-    for i in range(len(cols)):
-        target_uniq = df[cols[i]].astype(str).describe()['unique']
-        if target_uniq <= 30:
-            X_append = cat(df[[cols[i]]].fillna("@NAN@"), [cols[i]])
-        else:
-            X_append = ss.csc_matrix(
-                df['Цвет'].fillna("@NAN@").apply(
-                    lambda x: 0 if x == "@NAN@" else 1
-                ).reshape((len(df), 1))
-            )
-
-        X = X_append if X is None else ss.hstack((X, X_append))
-        l.info({
-            'i': "{0} of {1}".format(i, len(cols)),
-            'curr': X.shape,
-            'name': cols[i],
-            'shape': X_append.shape,
-            'target_uniq': target_uniq
-        })
-
-    return {'X': X}

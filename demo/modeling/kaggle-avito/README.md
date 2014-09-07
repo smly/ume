@@ -5,7 +5,6 @@
 ```
 $ ln -s ~/Downloads/avito_train.tsv data/input/avito_train.tsv
 $ ln -s ~/Downloads/avito_test.tsv data/input/avito_test.tsv
-$ ln -s ~/Downloads/
 ```
 
 ## Feature generation
