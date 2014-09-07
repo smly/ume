@@ -21,13 +21,13 @@ $ which python
 /home/smly/workspace/ume/venv/bin/python
 $ which pip
 /home/smly/workspace/ume/venv/bin/pip
-$ pip install https://github.com/smly/ume/archive/1.5.4.zip
+$ pip install https://github.com/smly/ume/archive/1.5.5.zip
 $ source venv/bin/active
 $ which ume
 /home/smly/workspace/ume/venv/bin/ume
 ```
 
-UME v1.5.4 strictly requires following versions:
+UME v1.5.5 strictly requires following versions:
 
 * Python 3.4.1
 * numpy 1.8.2
