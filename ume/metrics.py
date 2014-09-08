@@ -1,9 +1,17 @@
 # coding: utf-8
+import numpy as np
+
+
+def rmse(ans, pred):
+    """
+    For https://www.kaggle.com/c/afsis-soil-properties
+    """
+    return np.sqrt(np.mean((ans - pred) ** 2))
 
 
 def apk_score(ans, pred, k=32500):
     """
-    For avito comp.
+    For https://www.kaggle.com/c/avito-prohibited-content
     """
     assert len(ans) == len(pred)
     pred_idxlist = list(map(

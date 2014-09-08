@@ -25,28 +25,64 @@ def dynamic_load(cls_path):
     somemodule = importlib.import_module(module_name)
     return getattr(somemodule, class_name)
 
+
 MAT_FORMAT = "./data/working/{0}.mat"
+NPZ_FORMAT = "./data/working/{0}.npz"
+
+def save_npz(feature_name, output_dict):
+    np.savez(NPZ_FORMAT.format(feature_name), **output_dict)
 
 
 def save_mat(feature_name, output_dict):
     sio.savemat(MAT_FORMAT.format(feature_name), output_dict)
 
 
-def load_mat(feature_name):
-    exists, path = get_feature_stats(func_name)
-    if not exists:
-        raise RuntimeError("Matrix not found: {0}".format(feature_name))
-
-    return sio.loadmat(path)
+def load_mat(path):
+    if path.endswith('npz'):
+        return np.load(path)
+    elif path.endswith('mat'):
+        return sio.loadmat(path)
+    else:
+        raise RuntimeError("Unsupported filetype: npz or mat are required")
 
 
 def get_feature_stats(func_name):
     exist_mat = os.path.exists(MAT_FORMAT.format(func_name))
+    exist_npz = os.path.exists(NPZ_FORMAT.format(func_name))
+
+    print(exist_mat, exist_npz, func_name)
 
     if exist_mat:
         return True, MAT_FORMAT.format(func_name)
+    elif exist_npz:
+        return True, NPZ_FORMAT.format(func_name)
     else:
         return False, None
+
+
+class PredictForRegression(object):
+    def __init__(self, settings):
+        self.metrics = settings['metrics']
+        self.prediction = settings['prediction']
+        self.model = settings['model']
+
+    def solve(self, X_train, X_test, y_train):
+        params = self.prediction['params']
+        if "dense" in params and params['dense'] == "True":
+            l.info("Convert sparse matrix into dense matrix")
+            X_train = X_train.todense()
+            X_test = X_test.todense()
+            l.info("Convert sparse matrix into dense matrix ... done")
+
+        klass = dynamic_load(self.model['class'])
+        clf = klass(**self.model['params'])
+        l.info("Training model: {0}".format(str(clf)))
+        clf.fit(X_train, y_train)
+        l.info("Training model ... done")
+        y_pred = clf.predict(X_test)
+
+        return y_pred
+
 
 
 class PredictProba(object):
@@ -114,7 +150,7 @@ def _load_features(f_names):
             var_name = f_name['name']
             f_name = f_name['file']
 
-        X_add = sio.loadmat(f_name)[var_name]
+        X_add = load_mat(f_name)[var_name]
         if X is None:
             X = X_add
         elif type(X) is np.ndarray and type(X_add) is np.ndarray:

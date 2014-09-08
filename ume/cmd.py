@@ -14,7 +14,14 @@ import jsonnet
 import sklearn
 
 import ume
-from ume.utils import feature_functions, save_mat, dynamic_load, load_settings
+from ume.utils import (
+    feature_functions,
+    save_npz,
+    save_mat,
+    load_mat,
+    dynamic_load,
+    load_settings
+)
 from ume.visualize import Plot
 
 
@@ -98,6 +105,18 @@ def run_visualization(args):
     p.save(args.output, **layout_param)
 
 
+def _save_mat_or_npz(target, result):
+    result_keys = result.keys()
+    if len(result) == 0:
+        raise RuntimeError("No featur selected")
+
+    first_elem = list(result_keys)[0]
+    if type(result[first_elem]) is np.ndarray:
+        save_npz(target, result)
+    else:
+        save_mat(target, result)
+
+
 def run_feature(args):
     if args.all is True:
         print(args.name)
@@ -107,12 +126,12 @@ def run_feature(args):
             l.info("Feature generation: {0}".format(target))
             func = getattr(mod, name)
             result = func()
-            save_mat(target, result)
+            _save_mat_or_npz(target, result)
     else:
         l.info("Feature generation: {0}".format(args.name))
         klass = dynamic_load(args.name)
         result = klass()
-        save_mat(args.name, result)
+        _save_mat_or_npz(args.name, result)
 
 
 def run_initialize(args):
@@ -135,7 +154,7 @@ def _load_features(f_names):
             var_name = f_name['name']
             f_name = f_name['file']
 
-        X_add = sio.loadmat(f_name)[var_name]
+        X_add = load_mat(f_name)[var_name]
         if X is None:
             X = X_add
         elif type(X) is np.ndarray and type(X_add) is np.ndarray:
