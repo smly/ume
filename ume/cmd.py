@@ -6,11 +6,14 @@ import sys
 import json
 
 import numpy as np
+import scipy as sp
 import scipy.sparse as ss
 import scipy.io as sio
 import pandas as pd
 import jsonnet
+import sklearn
 
+import ume
 from ume.utils import feature_functions, save_mat, dynamic_load, load_settings
 from ume.visualize import Plot
 
@@ -18,7 +21,12 @@ from ume.visualize import Plot
 def parse_args():
     p = argparse.ArgumentParser(
         description='CLI interface UME')
-    p.add_argument('--config', dest='inifile', default='config.ini')
+    p.add_argument(
+        '--version',
+        dest='version',
+        action='store_true',
+        default=False
+    )
 
     subparsers = p.add_subparsers(
         dest='subparser_name',
@@ -180,14 +188,22 @@ def run_prediction(args):
 
 
 def run_version_checker(args):
-    pass
+    version_fmt = "{name:s} v{ver:s}"
+    print(version_fmt.format(name='ume', ver=ume.__version__))
+    print(version_fmt.format(name='numpy', ver=np.__version__))
+    print(version_fmt.format(name='scipy', ver=sp.__version__))
+    print(version_fmt.format(name='pandas', ver=pd.__version__))
+    print(version_fmt.format(name='scikit-learn', ver=sklearn.__version__))
+    print(version_fmt.format(name='jsonnet', ver=jsonnet.__version__))
 
 
 def main():
     l.basicConfig(format='%(asctime)s %(message)s', level=l.INFO)
     sys.path.append(os.getcwd())
     args = parse_args()
-    if args.subparser_name == 'validate':
+    if args.version:
+        run_version_checker(args)
+    elif args.subparser_name == 'validate':
         run_validation(args)
     elif args.subparser_name == 'visualize':
         run_visualization(args)
@@ -197,7 +213,5 @@ def main():
         run_feature(args)
     elif args.subparser_name == 'init':
         run_initialize(args)
-    elif args.subparser_name == 'version':
-        run_version_checker(args)
     else:
         raise RuntimeError("No such sub-command.")
