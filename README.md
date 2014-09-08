@@ -21,20 +21,20 @@ $ which python
 /home/smly/workspace/ume/venv/bin/python
 $ which pip
 /home/smly/workspace/ume/venv/bin/pip
-$ pip install https://github.com/smly/ume/archive/1.5.5.zip
+$ pip install https://github.com/smly/ume/archive/1.5.6.zip
 $ source venv/bin/active
 $ which ume
 /home/smly/workspace/ume/venv/bin/ume
 ```
 
-UME v1.5.5 strictly requires following versions:
+UME v1.5.6 strictly requires following versions:
 
 * Python 3.4.1
-* numpy 1.8.2
+* numpy 1.9.0
 * scipy 0.14.0
 * pandas 0.14.1
 * matplotlib 0.14.0
-* scikit-learn 0.15.1
+* scikit-learn 0.15.2
 * Cython
 * jsonnet 0.0.1
 
