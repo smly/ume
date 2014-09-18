@@ -48,6 +48,25 @@ AX_PLOT_KWARGS = [
     'linewidth',
     'color',
     'markersize',
+    'marker',
+]
+AX_HLINE_KWARGS = [
+    'y',
+    'linewidth',
+    'color',
+    'xmin',
+    'xmax',
+    'alpha',
+    'facecolor',
+]
+AX_VLINE_KWARGS = [
+    'x',
+    'linewidth',
+    'color',
+    'ymin',
+    'ymax',
+    'alpha',
+    'facecolor',
 ]
 BLACK = (0/256.0, 0/256.0, 0/256.0)
 
@@ -87,6 +106,22 @@ def plate_bar(ax, X, y, params):
         for k in params.keys() if k in PLATE_BAR_KWARGS
     }
     ax.bar(X, y, **plate_bar_params)
+
+
+def plate_hline(ax, X, y, params):
+    plot_params = {
+        k: params[k]
+        for k in params.keys() if k in AX_HLINE_KWARGS
+    }
+    ax.axhline(**plot_params)
+
+
+def plate_vline(ax, X, y, params):
+    plot_params = {
+        k: params[k]
+        for k in params.keys() if k in AX_VLINE_KWARGS
+    }
+    ax.axvline(**plot_params)
 
 
 def plate_line(ax, X, y, params):
