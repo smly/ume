@@ -50,6 +50,18 @@ AX_PLOT_KWARGS = [
     'markersize',
     'marker',
 ]
+AX_ANNOTATE_KWARGS = [
+    's',
+    'xy',
+    'xytext',
+    'textcoords',
+    'ha',
+    'va',
+    'bbox',
+    'fontsize',
+    'fontsize',
+    'arrowprops',
+]
 AX_HLINE_KWARGS = [
     'y',
     'linewidth',
@@ -92,7 +104,7 @@ def plate_timeseries(ax, X, y, params):
     ax.plot(datelist, y, **plate_timeseries_params)
 
 
-def plate_hist(ax, X, y, params):
+def plate_hist(ax, X, _y, params):
     plate_hist_params = {
         k: params[k]
         for k in params.keys() if k in PLATE_HIST_KWARGS
@@ -108,7 +120,7 @@ def plate_bar(ax, X, y, params):
     ax.bar(X, y, **plate_bar_params)
 
 
-def plate_hline(ax, X, y, params):
+def plate_hline(ax, _X, _y, params):
     plot_params = {
         k: params[k]
         for k in params.keys() if k in AX_HLINE_KWARGS
@@ -116,12 +128,51 @@ def plate_hline(ax, X, y, params):
     ax.axhline(**plot_params)
 
 
-def plate_vline(ax, X, y, params):
+def plate_vline(ax, _X, _y, params):
     plot_params = {
         k: params[k]
         for k in params.keys() if k in AX_VLINE_KWARGS
     }
     ax.axvline(**plot_params)
+
+
+def plate_annotate(ax, X, y, params):
+    """
+    http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.annotate
+    """
+    if 's' not in params:
+        raise RuntimeError("A `s` parameter is required.")
+
+    plot_params = {
+        k: params[k]
+        for k in params.keys() if k in AX_ANNOTATE_KWARGS
+    }
+    ax.annotate(
+        **plot_params
+    )
+
+
+def plate_annotate_all(ax, X, y, params):
+    """
+    http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.annotate
+    """
+    if 's' not in params:
+        raise RuntimeError("A `label` parameter is required.")
+    plot_params = {
+        k: params[k]
+        for k in params.keys() if k in AX_ANNOTATE_KWARGS
+    }
+
+    x_list = list(X)
+    y_list = list(y)
+    s_list = list(plot_params['s'])
+
+    for x_single, y_single, s_single in zip(x_list, y_list, s_list):
+        plot_params['xy'] = (x_single, y_single)
+        plot_params['s'] = s_single
+        ax.annotate(
+            **plot_params
+        )
 
 
 def plate_line(ax, X, y, params):
