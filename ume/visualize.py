@@ -21,7 +21,6 @@ import datetime
 
 import matplotlib.pylab as plt
 import matplotlib.dates as mdates
-
 from ume.utils import dynamic_load
 
 
@@ -34,6 +33,7 @@ BASE_COLORS = [
 ]
 PLATE_TS_KWARGS = [
     'color',
+    'marker',
     'linewidth',
 ]
 PLATE_HIST_KWARGS = [
@@ -216,9 +216,9 @@ class Plot(object):
             # ax change
             params = plot_data_list['ax_param']
             if 'xlim' in params:
-                plt.xlim(params['xlim'])
+                plt.xlim(**params['xlim'])
             if 'ylim' in params:
-                plt.ylim(params['ylim'])
+                plt.ylim(**params['ylim'])
             if 'xlabel' in params:
                 plt.xlabel(params['xlabel'])
             if 'xlabel' in params:
@@ -226,11 +226,28 @@ class Plot(object):
             if 'ylabel' in params:
                 ax.set_ylabel(params['ylabel'], fontsize=8)
 
-            #p1 = plt.Rectangle((0, 0), 0.5, 0.5, fc=BASE_COLORS[0], lw=0.2)
-            #p2 = plt.Rectangle((0, 0), 0.5, 0.5, fc=BASE_COLORS[2], lw=0.2)
-            #p3 = plt.Rectangle((0, 0), 0.5, 0.5, fc=BASE_COLORS[4], lw=0.2)
-            #ax.legend([p1, p2, p3], ["bucket5", "bucket7", "bucket11"],
-            #          fontsize=8)
+            if 'legend' in params:
+                patches = []
+                legend_names = []
+                for legend_args in params['legend']:
+                    legend_names.append(legend_args['name'])
+                    patches.append(
+                        plt.Rectangle(
+                            (0.2, 0.2),
+                            1.5,
+                            0.5,
+                            fc=legend_args['color'],
+                            lw=0.1
+                        )
+                    )
+
+                if 'legend_args' in params:
+                    legend_args = {
+                        'fontsize': 8,
+                    }
+                    legend_args.update(params['legend_args'])
+                    ax.legend(patches, legend_names, **legend_args)
+
             if 'grid' in params and params['grid'] == 'True':
                 ax.grid(color=(200/256.0, 200/256.0, 200/256.0),
                         linestyle=':',
