@@ -166,17 +166,18 @@ def _load_features(f_names):
 
 def _load_train_test(settings):
     X = _load_features(settings['features'])
-    idx_train = sio.loadmat(settings['idx']['train']['file'])[
+
+    idx_train = load_mat(settings['idx']['train']['file'])[
         settings['idx']['train']['name']
     ]
-    idx_test = sio.loadmat(settings['idx']['test']['file'])[
+    idx_test = load_mat(settings['idx']['test']['file'])[
         settings['idx']['test']['name']
     ]
     idx_train = idx_train[:, 0]
     idx_test = idx_test[:, 0]
     X_train = X[idx_train]
     X_test = X[idx_test]
-    y_train = sio.loadmat(settings['target']['file'])[
+    y_train = load_mat(settings['target']['file'])[
         settings['target']['name']
     ]
     #y_train = y_train[:, 0, 0]

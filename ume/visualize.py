@@ -248,7 +248,8 @@ class Plot(object):
                     legend_args.update(params['legend_args'])
                     ax.legend(patches, legend_names, **legend_args)
 
-            if 'grid' in params and params['grid'] == 'True':
+            if 'grid' in params and (
+                    params['grid'] == 'True' or params['grid'] is True):
                 ax.grid(color=(200/256.0, 200/256.0, 200/256.0),
                         linestyle=':',
                         linewidth=0.5)
@@ -257,6 +258,11 @@ class Plot(object):
                     mdates.DateFormatter('%Y-%m-%d'))
             if 'xticks_rotation' in params:
                 plt.xticks(rotation=params['xticks_rotation'])
+
+            if 'invert_xaxis' in params:
+                plt.gca().invert_xaxis()
+            if 'invert_yaxis' in params:
+                plt.gca().invert_yaxis()
 
             _change_tick_fontsize(ax, 8)
 
