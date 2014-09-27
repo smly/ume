@@ -134,15 +134,25 @@ def run_feature(args):
         _save_mat_or_npz(args.name, result)
 
 
-def run_initialize(args):
+def _makedirs(relative_path):
     pwd = os.getcwd()
-    os.makedirs(os.path.join(pwd, "data/input/model"))
-    os.makedirs(os.path.join(pwd, "data/input/visualize"))
-    os.makedirs(os.path.join(pwd, "data/output"))
-    os.makedirs(os.path.join(pwd, "data/output/visualize"))
-    os.makedirs(os.path.join(pwd, "data/working"))
-    os.makedirs(os.path.join(pwd, "note"))
-    os.makedirs(os.path.join(pwd, "trunk"))
+    full_path = os.path.join(pwd, relative_path)
+    if not os.path.exists(full_path):
+        os.makedirs(os.path.join(pwd, relative_path))
+
+
+def run_initialize(args):
+    dirs = [
+        "data/input/model",
+        "data/input/visualize",
+        "data/output",
+        "data/output/visualize",
+        "data/working",
+        "note",
+        "trunk",
+    ]
+    for path in dirs:
+        _makedirs(path)
 
 
 def _load_features(f_names):
