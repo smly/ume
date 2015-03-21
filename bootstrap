@@ -20,9 +20,9 @@ if ! [ -e $DST/bin/pyvenv ]; then
   mkdir -p $DST
   mkdir -p build
   cd build
-  wget https://www.python.org/ftp/python/3.4.1/Python-3.4.1.tgz
-  tar zxvf Python-3.4.1.tgz
-  cd Python-3.4.1
+  wget https://www.python.org/ftp/python/3.4.2/Python-3.4.2.tgz
+  tar zxvf Python-3.4.2.tgz
+  cd Python-3.4.2
   ./configure --prefix $DST && make && make install
   popd
 fi

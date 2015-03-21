@@ -1,3 +1,2 @@
-include ume/ensemble/libxgboostpy.so
 include requirements.txt
 include test-requirements.txt
