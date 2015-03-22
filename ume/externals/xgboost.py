@@ -13,6 +13,9 @@ class XGBoost(BaseEstimator):
         self.X = X
         self.y = y
 
+    def _set_test_label(self, y_test):
+        self.model.set_test_label(y_test)
+
     def predict_proba(self, X_test):
         pred = self.model.fit_predict(self.X, self.y, X_test)
         del self.model

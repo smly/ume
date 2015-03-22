@@ -40,6 +40,13 @@ cdef extern from "wrapper/xgboost_wrapper.h":
 
     void XGBoosterUpdateOneIter(void *handle, int it, void *dtrain)
 
+    const char *XGBoosterEvalOneIter(
+        void *handle,
+        int iteration,
+        void *dmats[],
+        const char *evnames[],
+        bst_ulong length)
+
     const float *XGBoosterPredict(
         void *handle,
         void *dmat,
@@ -53,10 +60,12 @@ cdef class XGBoost:
     cdef object params
     cdef void *dmats[2]  # 0: train, 1: test
     cdef object num_round
+    cdef object y_test
 
     def __cinit__(self, **cons_params):
         self.params = cons_params
         self.num_round = cons_params.get('num_round', 10)
+        self.y_test = None
 
     def __del__(self):
         XGBoosterFree(self.booster)
@@ -93,6 +102,9 @@ cdef class XGBoost:
         XGDMatrixSetFloatInfo(dmat, "label", &labels[0], y.size)
         self.dmats[idx] = dmat
 
+    def set_test_label(self, y):
+        self.y_test = y
+
     def set_param(self, k_str, v_str):
         k_byte_string = k_str.encode('utf-8')
         v_byte_string = v_str.encode('utf-8')
@@ -114,6 +126,9 @@ cdef class XGBoost:
             raise NotImplementedError("Unsupported data type")
 
         y_ts = np.zeros(X_ts.shape[0])
+        if self.y_test is not None:
+            y_ts = self.y_test
+
         if isinstance(X_ts, np.ndarray):
             self.load_nd(X_ts, y_ts, 1)
         elif isinstance(X_ts, ss.csr_matrix):
@@ -125,11 +140,36 @@ cdef class XGBoost:
         self.set_param('seed', '0')
         self.set_params()
 
+    def eval_set(self, it):
+        k_byte_string = "train".encode('utf-8')
+        v_byte_string = "test".encode('utf-8')
+        cdef const char* param_k = k_byte_string
+        cdef const char* param_v = v_byte_string
+        cdef const char* setnames[2]
+        setnames[0] = param_k
+        setnames[1] = param_v
+
+        length = 2
+        if self.y_test is None:
+            length = 1
+
+        s = XGBoosterEvalOneIter(
+            self.booster,
+            it,
+            self.dmats,
+            setnames,
+            length)
+
+        print(s.decode('utf-8', 'strict'))
+
     def fit_predict(self, X_tr, y_tr, X_ts):
         self.setup_cache(X_tr, y_tr, X_ts)
         for i in range(self.num_round):
             XGBoosterUpdateOneIter(self.booster, i, self.dmats[0])
+            if int(self.params.get('silent', 1)) < 2:
+                self.eval_set(i)
 
+        # Options
         ntree_limit = 0
         option_mask = 0x00
 
