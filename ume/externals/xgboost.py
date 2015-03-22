@@ -11,9 +11,13 @@ class XGBoost(BaseEstimator):
         self.y = None
 
     def __str__(self):
+        model_parameters = [
+            'objective', 'max_depth', 'min_child_weight',
+            'num_round', 'subsample']
         param_str = ", ".join(
             ["{0}={1}".format(k, self.params[k])
-            for k in sorted(self.params.keys())])
+            for k in sorted(self.params.keys())
+            if k in model_parameters])
         return "XGBoost({0})".format(param_str)
 
     def fit(self, X, y):

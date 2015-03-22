@@ -22,6 +22,7 @@ from ume.utils import (
     dynamic_load,
     load_settings
 )
+from ume.task import TaskSpec
 from ume.visualize import Plot
 
 
@@ -39,12 +40,15 @@ def parse_args():
         dest='subparser_name',
         help='sub-commands for instant action')
 
+    # feature
     f_parser = subparsers.add_parser('feature')
     f_parser.add_argument('-a', '--all', action='store_true', default=False)
     f_parser.add_argument('-n', '--name', type=str, required=True)
 
+    # initialize
     subparsers.add_parser('init')
 
+    # validate
     v_parser = subparsers.add_parser('validate')
     v_parser.add_argument(
         '-m', '--model',
@@ -52,10 +56,12 @@ def parse_args():
         type=str,
         help='model description file described by json format')
 
+    # visualize
     z_parser = subparsers.add_parser('visualize')
     z_parser.add_argument('-j', '--json', type=str, required=True)
     z_parser.add_argument('-o', '--output', type=str, required=True)
 
+    # predict
     p_parser = subparsers.add_parser('predict')
     p_parser.add_argument(
         '-m', '--model',
@@ -155,66 +161,18 @@ def run_initialize(args):
         _makedirs(path)
 
 
-def _load_features(f_names):
-    X = None
-    for f_name in f_names:
-        l.info(f_name)
-        var_name = 'X'
-        if type(f_name) is dict:
-            var_name = f_name['name']
-            f_name = f_name['file']
-
-        X_add = load_mat(f_name)[var_name]
-        if X is None:
-            X = X_add
-        elif type(X) is np.ndarray and type(X_add) is np.ndarray:
-            X = np.hstack((X, X_add))
-        else:
-            X = X_add if X is None else ss.hstack((X, X_add))
-    return X
-
-
-def _load_train_test(settings):
-    X = _load_features(settings['features'])
-
-    idx_train = load_mat(settings['idx']['train']['file'])[
-        settings['idx']['train']['name']
-    ]
-    idx_test = load_mat(settings['idx']['test']['file'])[
-        settings['idx']['test']['name']
-    ]
-    idx_train = idx_train[:, 0]
-    idx_test = idx_test[:, 0]
-    X_train = X[idx_train]
-    X_test = X[idx_test]
-    y_train = load_mat(settings['target']['file'])[
-        settings['target']['name']
-    ]
-    #y_train = y_train[:, 0, 0]
-    y_train = y_train[:, 0]
-    return X_train, X_test, y_train
-
-
 def run_validation(args):
-    settings = load_settings(args.model)
-    l.info("Loading dataset")
-    X, _, y = _load_train_test(settings)
-    kfoldcv = dynamic_load(settings['cross_validation']['method'])
-    score, variance = kfoldcv(X, y, settings)
-    l.info("CV score: {0:.4f} (var: {1:.6f})".format(score, variance))
+    conf = load_settings(args.model)
+    klass = dynamic_load(conf['task']['class'])
+    task = klass(args.model)
+    task.validate()
 
 
 def run_prediction(args):
-    settings = load_settings(args.model)
-    prediction = settings['prediction']
-    l.info("Loading dataset")
-    X_train, X_test, y_train = _load_train_test(settings)
-
-    predict_klass = dynamic_load(prediction['method'])
-    p = predict_klass(settings)
-    y_pred = p.solve(X_train, X_test, y_train)
-
-    pd.DataFrame({'y_pred': y_pred}).to_csv(args.output, index=False)
+    conf = load_settings(args.model)
+    klass = dynamic_load(conf['task']['class'])
+    task = klass(args.model)
+    task.create_submission(args.output)
 
 
 def run_version_checker(args):

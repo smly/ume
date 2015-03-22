@@ -3,3 +3,8 @@ __pycache__
 trunk
 build
 dist
+*.so
+*.cpp
+*.bak
+*.egg-info
+.build
