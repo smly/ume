@@ -79,11 +79,23 @@ class PredictForRegression(object):
         clf = klass(**self.model['params'])
         l.info("Training model: {0}".format(str(clf)))
         clf.fit(X_train, y_train)
-        l.info("Training model ... done")
         y_pred = clf.predict(X_test)
 
         return y_pred
 
+
+class MultiClassPredictProba(object):
+    def __init__(self, settings):
+        self.metrics = settings['metrics']
+        self.prediction = settings['prediction']
+        self.model = settings['model']
+
+    def solve(self, X_train, X_test, y_train):
+        klass = dynamic_load(self.model['class'])
+        clf = klass(**self.model['params'])
+        l.info("Training model: {0}".format(str(clf)))
+        clf.fit(X_train, y_train)
+        return clf.predict_proba(X_test)
 
 
 class PredictProba(object):
@@ -104,14 +116,13 @@ class PredictProba(object):
         clf = klass(**self.model['params'])
         l.info("Training model: {0}".format(str(clf)))
         clf.fit(X_train, y_train)
-        l.info("Training model ... done")
         y_pred = clf.predict_proba(X_test)[:, 0]
 
         return y_pred
 
 
 def load_settings(path):
-    if path.endswith(".jsonnet"):
+    if path.endswith(".jsonnet") or path.endswith(".jn"):
         settings = json.loads(jsonnet.load(path).decode())
     else:
         with open(path, 'r') as f:
@@ -142,7 +153,7 @@ def kfoldcv(X, y, settings):
     n_jobs = kfold_params.get('n_jobs', 1)
     n_folds = kfold_params.get('n_folds', 5)
 
-    kf = KFold(X.shape[0], n_folds=n_folds)
+    kf = KFold(X.shape[0], n_folds=n_folds, shuffle=True, random_state=777)
     scores = Parallel(n_jobs=n_jobs)(
         delayed(_cv)(X, y, idx_train, idx_test, settings)
         for idx_train, idx_test in kf

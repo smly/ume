@@ -6,7 +6,12 @@ try:
 except:
     pass
 
-from distutils.core import setup
+try:
+    from setuptools import setup, find_packages
+except ImportError:
+    from distutils.core import setup
+
+
 from Cython.Build import cythonize
 from distutils.extension import Extension
 
@@ -56,10 +61,8 @@ setup(
     version=version,
     description="Personal datamining framework for kaggle",
     ext_modules=cythonize(extensions),
-    #packages=find_packages(exclude=['doc', 'tests']),
-    #package_dir=['ume/externals'],
-    #packages=["ume/externals"],
-    #entry_points={'console_scripts': ['ume = ume.cmd:main']},
+    packages=find_packages(exclude=['doc', 'tests']),
+    entry_points={'console_scripts': ['ume = ume.cmd:main']},
     #test_suite='tests',
     #tests_require=test_requires,
     #install_requires=requires,

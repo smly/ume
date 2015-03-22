@@ -27,7 +27,7 @@ from ume.visualize import Plot
 
 def parse_args():
     p = argparse.ArgumentParser(
-        description='CLI interface UME')
+        description='CLI interface of Ume')
     p.add_argument(
         '--version',
         dest='version',
@@ -68,11 +68,11 @@ def parse_args():
         type=str,
         help='output file')
 
-    return p.parse_args()
+    return p
 
 
 def run_visualization(args):
-    if args.json.endswith(".jsonnet"):
+    if args.json.endswith(".jsonnet") or args.json.endswith(".jn"):
         config = json.loads(jsonnet.load(args.json).decode())
     else:
         with open(args.json, 'r') as f:
@@ -230,7 +230,8 @@ def run_version_checker(args):
 def main():
     l.basicConfig(format='%(asctime)s %(message)s', level=l.INFO)
     sys.path.append(os.getcwd())
-    args = parse_args()
+    p = parse_args()
+    args = p.parse_args()
     if args.version:
         run_version_checker(args)
     elif args.subparser_name == 'validate':
@@ -244,4 +245,4 @@ def main():
     elif args.subparser_name == 'init':
         run_initialize(args)
     else:
-        raise RuntimeError("No such sub-command.")
+        p.print_help()

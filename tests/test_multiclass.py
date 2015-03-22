@@ -22,3 +22,8 @@ class TestMulticlassDataset(object):
         score = multi_logloss(n['y_test'], y_pred)
         print(score)
         assert score < 0.3
+
+    def test_xgboost_str(self):
+        clf = XGBoost(num_round=100, seed=777)
+        print(str(clf))
+        assert str(clf) == "XGBoost(num_round=100, seed=777)"

@@ -1,4 +1,4 @@
-UME
+Ume
 ===
 
 My personal framework/toolbox for a data mining task.
@@ -9,7 +9,7 @@ reproducibility and productivity for a data mining competition on kaggle.com.
 Bootstrapping
 -------------
 
-UME requires very strict dependencies, so setting up a new virtual environment for UME is recommended:
+Ume requires very strict dependencies, so setting up a new virtual environment for Ume is recommended:
 
 ```
 $ pwd
@@ -21,23 +21,11 @@ $ which python
 /home/smly/workspace/ume/venv/bin/python
 $ which pip
 /home/smly/workspace/ume/venv/bin/pip
-$ pip install https://github.com/smly/ume/archive/v1.5.10.zip
+$ pip install https://github.com/smly/ume/archive/v2.0.zip
 $ source venv/bin/active
 $ which ume
 /home/smly/workspace/ume/venv/bin/ume
 ```
-
-UME v1.5.10 strictly requires following versions:
-
-* Python 3.4.1
-* numpy 1.9.0
-* scipy 0.14.0
-* pandas 0.14.1
-* matplotlib 0.14.0
-* scikit-learn 0.15.2
-* Cython
-* jsonnet 0.0.1
-
 
 Usage
 -----
@@ -94,5 +82,5 @@ $ cat data/input/model/lr_tfidf.json
 Documentation
 -------------
 
-I have no plan to describe how to use UME in details.
-If you are interested in it, plase send me pull request =)
+I have no plan to describe how to use this product in details.
+If you are interested in it, plase send me pull request :-)

@@ -32,4 +32,4 @@ $DST/bin/pyvenv venv
 source venv/bin/activate
 pip install numpy
 [ $? -eq 0 ] && pip install -r requirements.txt
-#[ $? -eq 0 ] && pip install https://github.com/smly/python-jsonnet/archive/v0.0.1.zip
+[ $? -eq 0 ] && pip install https://github.com/smly/python-jsonnet/archive/v0.0.1.zip
