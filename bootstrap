@@ -12,22 +12,24 @@
 # * https://github.com/matplotlib/matplotlib/tags
 # * https://github.com/scikit-learn/scikit-learn/tags
 
-DST=`pwd`"/build/.local"
+DST=`pwd`"/.build/.local"
+VERSION="3.4.3"
 
 if ! [ -e $DST/bin/pyvenv ]; then
   pushd `pwd`
   echo ">>>>> Building Python"
   mkdir -p $DST
-  mkdir -p build
-  cd build
-  wget https://www.python.org/ftp/python/3.4.2/Python-3.4.2.tgz
-  tar zxvf Python-3.4.2.tgz
-  cd Python-3.4.2
+  mkdir -p .build
+  cd .build
+  wget https://www.python.org/ftp/python/${VERSION}/Python-${VERSION}.tgz
+  tar zxvf Python-${VERSION}.tgz
+  cd Python-${VERSION}
   ./configure --prefix $DST && make && make install
   popd
 fi
 
 $DST/bin/pyvenv venv
 source venv/bin/activate
+pip install numpy
 [ $? -eq 0 ] && pip install -r requirements.txt
-[ $? -eq 0 ] && pip install https://github.com/smly/python-jsonnet/archive/v0.0.1.zip
+#[ $? -eq 0 ] && pip install https://github.com/smly/python-jsonnet/archive/v0.0.1.zip

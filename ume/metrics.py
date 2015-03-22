@@ -2,6 +2,17 @@
 import numpy as np
 
 
+def multi_logloss(y_true, y_pred, eps=1e-15):
+    predictions = np.clip(y_pred, eps, 1 - eps)
+    predictions /= predictions.sum(axis=1)[:, np.newaxis]
+
+    actual = np.zeros(y_pred.shape)
+    rows = actual.shape[0]
+    actual[np.arange(rows), y_true.astype(int)] = 1
+    vsota = np.sum(actual * np.log(predictions))
+    return -1.0 / rows * vsota
+
+
 def rmse(ans, pred):
     """
     For https://www.kaggle.com/c/afsis-soil-properties
