@@ -31,3 +31,8 @@ class XGBoost(BaseEstimator):
         pred = self.model.fit_predict(self.X, self.y, X_test)
         del self.model
         return pred
+
+    def predict(self, X_test):
+        pred = self.model.fit_predict(self.X, self.y, X_test)
+        del self.model
+        return pred
