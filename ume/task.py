@@ -15,7 +15,7 @@ from ume.utils import dynamic_load
 from ume.metrics import multi_logloss
 
 
-def hstack_mat(X, mat_fn, mat_name):
+def hstack_mat(X, mat_fn, mat_name, conf=None):
     if mat_fn.endswith('.mat'):
         X_add = sio.loadmat(mat_fn)[mat_name]
         X_add = ss.csr_matrix(X_add)
@@ -23,6 +23,12 @@ def hstack_mat(X, mat_fn, mat_name):
         X_add = np.load(mat_fn)[mat_name]
     else:
         raise RuntimeError("unsupported file")
+
+    # slicing
+    if conf is not None and 'slice' in conf:
+        slice_start, slice_end = conf['slice']
+        slice_start, slice_end = int(slice_start), int(slice_end)
+        X_add = X_add[:, slice_start:slice_end]
 
     # horizontal stack
     if X is None:
@@ -49,10 +55,10 @@ def make_X_from_features(conf):
         if isinstance(mat_info, dict):
             mat_fn = mat_info['file']
             mat_name = mat_info['name']
-            X = hstack_mat(X, mat_fn, mat_name)
+            X = hstack_mat(X, mat_fn, mat_name, conf=mat_info)
         # string format
         elif isinstance(mat_info, str):
-            X = hstack_mat(X, mat_info, 'X')
+            X = hstack_mat(X, mat_info, 'X', conf=None)
         else:
             raise RuntimeError("Unsupported feature type: {0}".format(mat_info))
 
@@ -63,6 +69,13 @@ def make_X_from_features(conf):
 
 
 def load_array(conf, name_path):
+    """
+    Load array from working data
+
+    ```
+    >> train_ids = load_array(self._conf, 'task.dataset.id_train')
+    ```
+    """
     arr_ = dict(conf)
     for name in name_path.split('.'):
         arr_ = arr_[name]
