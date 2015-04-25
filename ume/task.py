@@ -124,11 +124,20 @@ class TaskSpec(object):
         method = dynamic_load(self._conf['task']['params']['postprocessing'])
         method(output_fn)
 
-    def create_submission(self, output_fn):
+    def _to_output_fn(self, model_fn):
+        output_fn = model_fn.replace(
+            'data/input/model/',
+            'data/output/')
+        output_fn = output_fn + '.csv'
+        return output_fn
+
+    def create_submission(self, model_fn):
         """
         called by `ume predict`
         task specified.
         """
+        output_fn = self._to_output_fn(model_fn)
+
         self._create_submission(output_fn)
         self._post_processing(output_fn)
 
@@ -295,17 +304,7 @@ class Regression(TaskSpec):
         del clf
         return preds
 
-    def _to_output_fn(self, model_fn):
-        output_fn = model_fn.replace(
-            'data/input/model/',
-            'data/output/')
-        output_fn =+ '.csv'
-
-        return output_fn
-
-    def _create_submission(self, model_fn):
-        output_fn = _to_output_fn(model_fn)
-
+    def _create_submission(self, output_fn):
         X_orig = make_X_from_features(self._conf)
         train_ids = load_array(self._conf, 'task.dataset.id_train')
         test_ids = load_array(self._conf, 'task.dataset.id_test')

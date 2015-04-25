@@ -1,0 +1,29 @@
+/*
+  Task description
+  ----------------
+  Title: iris dataset demo
+  Metrics: Multi Logloss
+  Task: Multi-class classification
+*/
+{
+    "task": {
+        "class": "ume.task.MultiClassPredictProba",
+        "params": {
+            "metrics": {
+                "method": "ume.metrics.multi_logloss",
+            },
+            "validation": {
+                "class": "utils.KFold",
+                "params": {
+                    "n_jobs": 1,
+                    "shuffle": "True",
+                },
+            },
+        },
+        "dataset": {
+            "y_train": { "file": "data/working/feat.gen_first_two.npz", "name": "y" },
+            "id_train": { "file": "data/working/feat.gen_first_two.npz", "name": "id_train" },
+            "id_test": { "file": "data/working/feat.gen_first_two.npz", "name": "id_test" },
+        },
+    },
+}
