@@ -21,7 +21,7 @@ $ which python
 /home/smly/workspace/ume/venv/bin/python
 $ which pip
 /home/smly/workspace/ume/venv/bin/pip
-$ pip install https://github.com/smly/ume/archive/v2.0.zip
+$ pip install https://github.com/smly/ume/archive/v2.0.3.zip
 $ source venv/bin/active
 $ which ume
 /home/smly/workspace/ume/venv/bin/ume

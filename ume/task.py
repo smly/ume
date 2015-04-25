@@ -129,7 +129,7 @@ class TaskSpec(object):
 
     def create_submission(self, model_fn):
         """
-        called by `ume predict`
+        Called by `ume predict`
         task specified.
         """
         output_fn = self._to_output_fn(model_fn)
@@ -139,7 +139,7 @@ class TaskSpec(object):
 
     def validate(self):
         """
-        called by `ume validation`
+        Called by `ume validation`
         """
         X_orig = make_X_from_features(self._conf)
         train_sz = len(load_array(self._conf, 'task.dataset.id_train'))

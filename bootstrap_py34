@@ -32,4 +32,6 @@ $DST/bin/pyvenv venv
 source venv/bin/activate
 pip install numpy
 [ $? -eq 0 ] && pip install -r requirements.txt
-[ $? -eq 0 ] && pip install https://github.com/smly/python-jsonnet/archive/v0.0.1.zip
+
+# seaborn 0.6dev
+pip install https://github.com/mwaskom/seaborn/archive/5debd4fb3793c0325c84616c8d79985d87a40b72.zip
