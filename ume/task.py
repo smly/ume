@@ -2,15 +2,18 @@
 import json
 import random
 import logging as l
+import os
 
 import scipy.sparse as ss
 import scipy.io as sio
 import pandas as pd
 import numpy as np
-import ume.externals.jsonnet
 from sklearn.cross_validation import StratifiedShuffleSplit as SSS
 from sklearn.cross_validation import KFold
 from sklearn.externals.joblib import Parallel, delayed
+
+import ume
+import ume.externals.jsonnet
 from ume.utils import dynamic_load
 from ume.metrics import multi_logloss
 
@@ -49,7 +52,6 @@ def make_X_from_features(conf):
     Make X from features in a model description.
     """
     X = None
-
     for mat_info in conf['features']:
         # dict format
         if isinstance(mat_info, dict):
@@ -57,7 +59,7 @@ def make_X_from_features(conf):
             mat_name = mat_info['name']
             X = hstack_mat(X, mat_fn, mat_name, conf=mat_info)
         # string format
-        elif isinstance(mat_info, str):
+        elif isinstance(mat_info, str) or isinstance(mat_info, unicode):
             X = hstack_mat(X, mat_info, 'X', conf=None)
         else:
             raise RuntimeError("Unsupported feature type: {0}".format(mat_info))
@@ -94,6 +96,7 @@ def load_array(conf, name_path):
 class TaskSpec(object):
     def __init__(self, jn):
         self._conf = self.__load_conf(jn)
+        self._jn = jn
 
     def __load_conf(self, jn):
         json_dic = ume.externals.jsonnet.load(jn)
@@ -148,7 +151,13 @@ class TaskSpec(object):
         y = y.reshape(y.size)
 
         task_metrics = self._conf['task']['params']['metrics']
-        metrics = dynamic_load(task_metrics.get('method', task_metrics))
+        if isinstance(task_metrics, str):
+            task_method = task_metrics
+        elif isinstance(task_metrics, dict):
+            task_method = task_metrics['method']
+        else:
+            raise RuntimeError("invalid task metrics")
+        metrics = dynamic_load(task_method)
 
         cv_scores = []
         #ss = SSS(y, 5, test_size=0.1, random_state=777)
@@ -169,9 +178,16 @@ class TaskSpec(object):
             l.info("KFold: ({0}) {1:.4f}".format(kth, score))
             cv_scores.append(score)
 
+        mean_cv_score = np.mean(cv_scores)
         l.info("CV Score: {0:.4f} (var: {1:.6f})".format(
-            np.mean(cv_scores),
+            mean_cv_score,
             np.var(cv_scores)))
+
+        ume.db.add_validation_score(
+            os.path.basename(self._jn),
+            ume.__version__,
+            task_method,
+            mean_cv_score)
 
 
 class MultiClassPredictProba(TaskSpec):
@@ -242,7 +258,13 @@ class DebugMultiClassPredictProba(TaskSpec):
         y = y.reshape(y.size)
 
         task_metrics = self._conf['task']['params']['metrics']
-        metrics = dynamic_load(task_metrics.get('method', task_metrics))
+        if isinstance(task_metrics, str):
+            task_method = task_metrics
+        elif isinstance(task_metrics, dict):
+            task_method = task_metrics['method']
+        else:
+            raise RuntimeError("invalid task metrics")
+        metrics = dynamic_load(task_method)
 
         cv_scores = []
         kf = KFold(X.shape[0], n_folds=10, shuffle=True, random_state=777)
@@ -256,9 +278,16 @@ class DebugMultiClassPredictProba(TaskSpec):
             l.info("KFold: ({0}) {1:.4f}".format(kth, score))
             cv_scores.append(score)
 
+        mean_cv_score = np.mean(cv_scores)
         l.info("CV Score: {0:.4f} (var: {1:.6f})".format(
-            np.mean(cv_scores),
+            mean_cv_score,
             np.var(cv_scores)))
+
+        ume.db.add_validation_score(
+            os.path.basename(self._jn),
+            ume.__version__,
+            task_method,
+            mean_cv_score)
 
     def _create_submission(self, output_fn):
         X_orig = make_X_from_features(self._conf)
