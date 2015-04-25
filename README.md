@@ -1,7 +1,7 @@
 Ume
 ===
 
-My personal framework/toolbox for a data mining task.
+My private framework/toolbox for a data mining task.
 
 This application's main goal is to provide a framework that is able to increase
 reproducibility and productivity for a data mining competition on kaggle.com.
@@ -26,11 +26,6 @@ $ source venv/bin/active
 $ which ume
 /home/smly/workspace/ume/venv/bin/ume
 ```
-
-Usage
------
-
-TBD
 
 Documentation
 -------------

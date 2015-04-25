@@ -1,13 +1,72 @@
-## demo for iris dataset
+# Demo using iris dataset
+
+## Model definition
+
+The model in ume framework is defined with jsonnet.
+
+### task specification file (data/input/model/spec.jn):
+
+```json
+/*
+  Task description
+  ----------------
+  Title: iris dataset demo
+  Metrics: Multi Logloss
+  Task: Multi-class classification
+*/
+{
+    "task": {
+        "class": "ume.task.MultiClassPredictProba",
+        "params": {
+            "metrics": {
+                "method": "ume.metrics.multi_logloss",
+            },
+            "validation": {
+                "class": "utils.KFold",
+                "params": {
+                    "n_jobs": 1,
+                    "shuffle": "True",
+                },
+            },
+        },
+        "dataset": {
+            "y_train": { "file": "data/working/feat.gen_first_two.npz", "name": "y" },
+            "id_train": { "file": "data/working/feat.gen_first_two.npz", "name": "id_train" },
+            "id_test": { "file": "data/working/feat.gen_first_two.npz", "name": "id_test" },
+        },
+    },
+}
+```
+
+### model parameter file (data/input/model/v3_linear_model_plus_pca.jn):
 
 ```
-## Preprocessing/feature extraction
+import "spec.jn" {
+    "model": {
+        "class": "sklearn.linear_model.LogisticRegression",
+        "params": {
+            "C": 10.0
+        }
+    },
+    "features": [
+        "data/working/feat.gen_first_two.npz",
+        "data/working/feat.gen_pca.npz",
+    ],
+}
+```
+
+## Feature extraction
+
+```bash
 $ ume feature -a -n feat
 feat
 2015-04-25 14:28:00,644 Feature generation: feat.gen_pca
 2015-04-25 14:28:00,655 Feature generation: feat.gen_first_two
+```
 
 ## Cross validation
+
+```bash
 $ ume validate -m data/input/model/v3_linear_model_plus_pca.jn
 2015-04-25 14:33:38,843 Clf: LogisticRegression(C=10, class_weight=None, dual=False, fit_intercept=True,
           intercept_scaling=1, penalty='l2', random_state=None, tol=0.0001), X: (90, 5)
@@ -40,8 +99,11 @@ $ ume validate -m data/input/model/v3_linear_model_plus_pca.jn
           intercept_scaling=1, penalty='l2', random_state=None, tol=0.0001), X: (90, 5)
 2015-04-25 14:33:38,857 KFold: (9) 0.2138
 2015-04-25 14:33:38,858 CV Score: 0.2352 (var: 0.006345)
+```
 
 ## Generate a submission file
+
+```bash
 $ ume predict -m data/input/model/v3_linear_model_plus_pca.jn
 2015-04-25 14:35:19,599 Clf: LogisticRegression(C=10, class_weight=None, dual=False, fit_intercept=True,
           intercept_scaling=1, penalty='l2', random_state=None, tol=0.0001), X: (100, 5)
@@ -59,57 +121,3 @@ Line43,0.9569647282863225,0.04303527080272157,9.109559142150738e-10
 Line36,0.9151981984879709,0.08480180148930301,2.2726024401203313e-11
 ```
 
-## Model definition
-
-The model in ume framework is defined with jsonnet.
-
-task specification (data/input/model/spec.jn):
-
-```
-/*
-  Task description
-  ----------------
-  Title: iris dataset demo
-  Metrics: Multi Logloss
-  Task: Multi-class classification
-*/
-{
-    "task": {
-        "class": "ume.task.MultiClassPredictProba",
-        "params": {
-            "metrics": {
-                "method": "ume.metrics.multi_logloss",
-            },
-            "validation": {
-                "class": "utils.KFold",
-                "params": {
-                    "n_jobs": 1,
-                    "shuffle": "True",
-                },
-            },
-        },
-        "dataset": {
-            "y_train": { "file": "data/working/feat.gen_first_two.npz", "name": "y" },
-            "id_train": { "file": "data/working/feat.gen_first_two.npz", "name": "id_train" },
-            "id_test": { "file": "data/working/feat.gen_first_two.npz", "name": "id_test" },
-        },
-    },
-}
-```
-
-model parameters (data/input/model/v3_linear_model_plus_pca.jn):
-
-```
-import "spec.jn" {
-    "model": {
-        "class": "sklearn.linear_model.LogisticRegression",
-        "params": {
-            "C": 10.0
-        }
-    },
-    "features": [
-        "data/working/feat.gen_first_two.npz",
-        "data/working/feat.gen_pca.npz",
-    ],
-}
-```
