@@ -7,7 +7,7 @@ import scipy.sparse as ss
 import scipy.io as sio
 import pandas as pd
 import numpy as np
-import jsonnet
+import ume.externals.jsonnet
 from sklearn.cross_validation import StratifiedShuffleSplit as SSS
 from sklearn.cross_validation import KFold
 from sklearn.externals.joblib import Parallel, delayed
@@ -96,13 +96,9 @@ class TaskSpec(object):
         self._conf = self.__load_conf(jn)
 
     def __load_conf(self, jn):
-        json_str = jsonnet.load(jn).decode('utf-8')
-        if "ERROR" in json_str:
-            raise RuntimeError(json_str)
-        try:
-            json_dic = json.loads(json_str)
-        except:
-            raise RuntimeError("Broken json data")
+        json_dic = ume.externals.jsonnet.load(jn)
+        if "ERROR" in json_dic:
+            raise RuntimeError(json_dic)
 
         return json_dic
 

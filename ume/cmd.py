@@ -10,7 +10,6 @@ import scipy as sp
 import scipy.sparse as ss
 import scipy.io as sio
 import pandas as pd
-import jsonnet
 import sklearn
 
 import ume
@@ -136,7 +135,6 @@ def run_version_checker(args):
     print(version_fmt.format(name='scipy', ver=sp.__version__))
     print(version_fmt.format(name='pandas', ver=pd.__version__))
     print(version_fmt.format(name='scikit-learn', ver=sklearn.__version__))
-    print(version_fmt.format(name='jsonnet', ver=jsonnet.__version__))
 
 
 def main():

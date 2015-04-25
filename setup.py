@@ -28,6 +28,15 @@ with open('requirements.txt', 'r') as f:
 with open('test-requirements.txt', 'r') as f:
     test_requires = [x.strip() for x in f if x.strip()]
 
+jsonnet_files = [
+    "ume/externals/_jsonnet_wrapper.pyx",
+    "ume/externals/_jsonnet/static_analysis.cpp",
+    "ume/externals/_jsonnet/lexer.cpp",
+    "ume/externals/_jsonnet/vm.cpp",
+    "ume/externals/_jsonnet/parser.cpp",
+    "ume/externals/_jsonnet/libjsonnet.cpp",
+]
+
 xgboost_files = [
     "ume/externals/_xgboost_wrapper.pyx",
     "ume/externals/_xgboost/wrapper/xgboost_wrapper.cpp",
@@ -40,6 +49,21 @@ xgboost_files = [
 ]
 
 extensions = [
+    Extension("ume.externals._jsonnet_wrapper", jsonnet_files,
+        include_dirs=['ume/externals/_jsonnet'],
+        library_dirs=[],
+        libraries=['pthread'],
+        extra_link_args=[
+            '-fPIC',
+            '-std=c++0x'],
+        extra_compile_args=[
+            '-O3', '-pedantic', '-Wall',
+            '-std=c++0x',
+            '-fPIC',
+            '-static'],
+        define_macros=[],
+        depends=[],
+        language='c++'),
     Extension("ume.externals._xgboost_wrapper", xgboost_files,
         include_dirs=['ume/externals/_xgboost'],
         library_dirs=[],

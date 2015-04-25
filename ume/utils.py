@@ -4,11 +4,12 @@ import importlib
 import os
 import json
 
-import jsonnet
 import numpy as np
 import scipy.io as sio
 from sklearn.cross_validation import KFold, ShuffleSplit, LeaveOneOut
 from sklearn.externals.joblib import Parallel, delayed
+
+import ume.externals.jsonnet
 
 
 def feature_functions(module_name):
@@ -123,7 +124,7 @@ class PredictProba(object):
 
 def load_settings(path):
     if path.endswith(".jsonnet") or path.endswith(".jn"):
-        settings = json.loads(jsonnet.load(path).decode())
+        settings = ume.externals.jsonnet.load(path)
     else:
         with open(path, 'r') as f:
             settings = json.load(f)
