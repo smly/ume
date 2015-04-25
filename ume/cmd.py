@@ -14,6 +14,7 @@ import jsonnet
 import sklearn
 
 import ume
+import ume.db
 from ume.utils import (
     feature_functions,
     save_npz,
@@ -23,7 +24,6 @@ from ume.utils import (
     load_settings
 )
 from ume.task import TaskSpec
-from ume.visualize import Plot
 
 
 def parse_args():
@@ -56,11 +56,6 @@ def parse_args():
         type=str,
         help='model description file described by json format')
 
-    # visualize
-    z_parser = subparsers.add_parser('visualize')
-    z_parser.add_argument('-j', '--json', type=str, required=True)
-    z_parser.add_argument('-o', '--output', type=str, required=True)
-
     # predict
     p_parser = subparsers.add_parser('predict')
     p_parser.add_argument(
@@ -68,47 +63,8 @@ def parse_args():
         required=True,
         type=str,
         help='model description file described by json format')
-    p_parser.add_argument(
-        '-o', '--output',
-        required=True,
-        type=str,
-        help='output file')
 
     return p
-
-
-def run_visualization(args):
-    if args.json.endswith(".jsonnet") or args.json.endswith(".jn"):
-        config = json.loads(jsonnet.load(args.json).decode())
-    else:
-        with open(args.json, 'r') as f:
-            config = json.load(f)
-
-    title_name = config['title'] if 'title' in config else ""
-    p = Plot(title=title_name)
-    data_dict = {}
-    for source_name in config['datasource'].keys():
-        data_dict[source_name] = pd.read_csv(config['datasource'][source_name])
-
-    for i, plotdata in enumerate(config['plotdata']):
-        if 'plot' not in plotdata:
-            continue  # empty space
-
-        for j, plate in enumerate(plotdata['plot']):
-            plate_source = data_dict[plate['source']]
-            for ax_name in ['X', 'y']:
-                if ax_name == 'y' and ax_name not in plate:
-                    # plate_hist doesn't require y-axis.
-                    config['plotdata'][i]['plot'][j][ax_name] = None
-                else:
-                    col = plate[ax_name]
-                    config['plotdata'][i]['plot'][j][ax_name] = plate_source[col]
-
-    layout_param = {} if 'layout' not in config else config['layout']
-
-    for c in config['plotdata']:
-        p.add(c)
-    p.save(args.output, **layout_param)
 
 
 def _save_mat_or_npz(target, result):
@@ -150,9 +106,7 @@ def _makedirs(relative_path):
 def run_initialize(args):
     dirs = [
         "data/input/model",
-        "data/input/visualize",
         "data/output",
-        "data/output/visualize",
         "data/working",
         "note",
         "trunk",
@@ -172,7 +126,7 @@ def run_prediction(args):
     conf = load_settings(args.model)
     klass = dynamic_load(conf['task']['class'])
     task = klass(args.model)
-    task.create_submission(args.output)
+    task.create_submission(args.model)
 
 
 def run_version_checker(args):
@@ -190,17 +144,27 @@ def main():
     sys.path.append(os.getcwd())
     p = parse_args()
     args = p.parse_args()
+
+    if args.subparser_name == 'init':
+        if ume.db.exists_sqlitedb():
+            l.warning("umedb already exists.")
+            sys.exit(1)
+        else:
+            run_initialize(args)
+            ume.db.init_db()
+            sys.exit(0)
+
+    if not ume.db.exists_sqlitedb():
+        l.warning("umedb doesn't exists. Create new db now.")
+        ume.db.init_db()
+
     if args.version:
         run_version_checker(args)
     elif args.subparser_name == 'validate':
         run_validation(args)
-    elif args.subparser_name == 'visualize':
-        run_visualization(args)
     elif args.subparser_name == 'predict':
         run_prediction(args)
     elif args.subparser_name == 'feature':
         run_feature(args)
-    elif args.subparser_name == 'init':
-        run_initialize(args)
     else:
         p.print_help()
