@@ -37,5 +37,4 @@ class TestJsonnetCythonWrapper(object):
 }
 """)
         json_obj = json.loads(raw_string_json.decode('utf-8'))
-
         assert json_obj == {"name": "value"}

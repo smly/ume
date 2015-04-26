@@ -105,9 +105,27 @@ class TaskSpec(object):
 
         return json_dic
 
+    def _to_str_value(self, param_dict):
+        converted_param_dict = {}
+        for k, v in param_dict.items():
+            if isinstance(v, int):
+                converted_param_dict[k] = v
+            elif isinstance(v, str):
+                converted_param_dict[k] = v
+            elif isinstance(v, float):
+                converted_param_dict[k] = v
+            elif isinstance(v, dict):
+                # convert recursively
+                converted_param_dict[k] = self._to_str_value(v)
+            else:
+                # handle unicode for py27
+                converted_param_dict[k] = str(v)
+        return converted_param_dict
+
     def _load_model(self):
         model_klass = dynamic_load(self._conf['model']['class'])
-        clf = model_klass(**(self._conf['model'].get('params', {})))
+        model_param = self._to_str_value(self._conf['model'].get('params', {}))
+        clf = model_klass(**model_param)
         return clf
 
     def solve(self, X_train, y_train, X_test):
