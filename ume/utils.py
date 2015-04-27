@@ -202,33 +202,6 @@ def load_dataset(settings):
     return X_train, X_test, y_train
 
 
-def loocv(X, y, settings):
-    prediction = settings['prediction']
-
-    scores = []
-    l.info("Matrix shape: {0}".format(X.shape))
-    loo = LeaveOneOut(X.shape[0])
-    for idx_train, idx_test in loo:
-        X_train, X_test = X[idx_train], X[idx_test]
-        y_train, y_test = y[idx_train], y[idx_test]
-
-        predict_klass = dynamic_load(prediction['method'])
-        p = predict_klass(settings)
-        y_pred = p.solve(X_train, X_test, y_train)
-
-        if y_pred.tolist()[0] >= 0.5 and y_test.tolist()[0] >= 0.5:
-            scores.append(1.0)
-        elif y_pred.tolist()[0] < 0.5 and y_test.tolist()[0] < 0.5:
-            scores.append(1.0)
-        else:
-            scores.append(0.0)
-
-        l.info("Score: yes={0}, trial={1}, size={2}".format(
-            int(np.array(scores).sum()), len(scores), X.shape[0]))
-
-    return np.array(scores).mean(), np.array(scores).var()
-
-
 def unsafe_shuffle_split(X, y, settings):
     metrics = dynamic_load(settings['metrics']['method'])
     metrics_params = settings['metrics']['params']

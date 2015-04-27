@@ -13,6 +13,7 @@ from sklearn.cross_validation import KFold
 from sklearn.externals.joblib import Parallel, delayed
 
 import ume
+import ume.cross_validation
 import ume.externals.jsonnet
 from ume.utils import dynamic_load
 from ume.metrics import multi_logloss
@@ -93,6 +94,38 @@ def load_array(conf, name_path):
         raise RuntimeError("Unsupported feature type: {0}".format(mat_info))
 
 
+def _to_str_value(param_dict):
+    # Primitive values
+    if isinstance(param_dict, int):
+        return param_dict
+    elif isinstance(param_dict, str):
+        return param_dict
+    elif isinstance(param_dict, float):
+        return param_dict
+
+    converted_param_dict = {}
+    for k, v in param_dict.items():
+        if isinstance(v, int):
+            converted_param_dict[k] = v
+        elif isinstance(v, str):
+            converted_param_dict[k] = v
+        elif isinstance(v, float):
+            converted_param_dict[k] = v
+        elif isinstance(v, list):
+            # convert recursively
+            converted_param_dict[k] = [
+                _to_str_value(elem)
+                for elem in v
+            ]
+        elif isinstance(v, dict):
+            # convert recursively
+            converted_param_dict[k] = _to_str_value(v)
+        else:
+            # handle unicode for py27
+            converted_param_dict[k] = str(v)
+    return converted_param_dict
+
+
 class TaskSpec(object):
     def __init__(self, jn):
         self._conf = self.__load_conf(jn)
@@ -105,26 +138,9 @@ class TaskSpec(object):
 
         return json_dic
 
-    def _to_str_value(self, param_dict):
-        converted_param_dict = {}
-        for k, v in param_dict.items():
-            if isinstance(v, int):
-                converted_param_dict[k] = v
-            elif isinstance(v, str):
-                converted_param_dict[k] = v
-            elif isinstance(v, float):
-                converted_param_dict[k] = v
-            elif isinstance(v, dict):
-                # convert recursively
-                converted_param_dict[k] = self._to_str_value(v)
-            else:
-                # handle unicode for py27
-                converted_param_dict[k] = str(v)
-        return converted_param_dict
-
     def _load_model(self):
         model_klass = dynamic_load(self._conf['model']['class'])
-        model_param = self._to_str_value(self._conf['model'].get('params', {}))
+        model_param = _to_str_value(self._conf['model'].get('params', {}))
         clf = model_klass(**model_param)
         return clf
 
@@ -164,42 +180,19 @@ class TaskSpec(object):
         """
         X_orig = make_X_from_features(self._conf)
         train_sz = len(load_array(self._conf, 'task.dataset.id_train'))
-        X = X_orig[np.array(range(train_sz)), :]
+        X = X_orig[:train_sz, :]
         y = load_array(self._conf, 'task.dataset.y_train')
         y = y.reshape(y.size)
 
+        cv_method_name = self._conf['task']['params']['validation']['class']
+        cv_params_name = self._conf['task']['params']['validation']['params']
+        cv_params_name = _to_str_value(cv_params_name)
+
+        cv_method = dynamic_load(cv_method_name)
+        mean_cv_score = cv_method(X, y, self, **cv_params_name)
+
         task_metrics = self._conf['task']['params']['metrics']
-        if isinstance(task_metrics, str):
-            task_method = task_metrics
-        elif isinstance(task_metrics, dict):
-            task_method = task_metrics['method']
-        else:
-            raise RuntimeError("invalid task metrics")
-        metrics = dynamic_load(task_method)
-
-        cv_scores = []
-        #ss = SSS(y, 5, test_size=0.1, random_state=777)
-        #for kth, (train_idx, test_idx) in enumerate(ss):
-        #    X_train, X_test = X[train_idx], X[test_idx]
-        #    y_train, y_test = y[train_idx], y[test_idx]
-        #    y_pred = self.solve(X_train, y_train, X_test)
-        #    score = metrics(y_test, y_pred)
-        #    l.info("KFold: ({0}) {1:.4f}".format(kth, score))
-        #    cv_scores.append(score)
-
-        kf = KFold(X.shape[0], n_folds=10, shuffle=True, random_state=777)
-        for kth, (train_idx, test_idx) in enumerate(kf):
-            X_train, X_test = X[train_idx], X[test_idx]
-            y_train, y_test = y[train_idx], y[test_idx]
-            y_pred = self.solve(X_train, y_train, X_test)
-            score = metrics(y_test, y_pred)
-            l.info("KFold: ({0}) {1:.4f}".format(kth, score))
-            cv_scores.append(score)
-
-        mean_cv_score = np.mean(cv_scores)
-        l.info("CV Score: {0:.4f} (var: {1:.6f})".format(
-            mean_cv_score,
-            np.var(cv_scores)))
+        task_method = task_metrics['method']
 
         ume.db.add_validation_score(
             os.path.basename(self._jn),

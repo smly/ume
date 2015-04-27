@@ -22,11 +22,7 @@ The model in ume framework is defined with jsonnet.
                 "method": "ume.metrics.multi_logloss",
             },
             "validation": {
-                "class": "utils.KFold",
-                "params": {
-                    "n_jobs": 1,
-                    "shuffle": "True",
-                },
+                "class": "ume.cross_validation.kfold",
             },
         },
         "dataset": {
