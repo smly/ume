@@ -132,37 +132,6 @@ def load_settings(path):
     return settings
 
 
-def _cv(X, y, idx_train, idx_test, settings):
-    X_train, X_test = X[idx_train], X[idx_test]
-    y_train, y_test = y[idx_train], y[idx_test]
-
-    metrics = dynamic_load(settings['metrics']['method'])
-    metrics_params = settings['metrics']['params']
-    prediction = settings['prediction']
-
-    predict_klass = dynamic_load(prediction['method'])
-    p = predict_klass(settings)
-    y_pred = p.solve(X_train, X_test, y_train)
-
-    score = metrics(y_test, y_pred, **metrics_params)
-    l.info("Score: {0:.4f}".format(score))
-    return score
-
-
-def kfoldcv(X, y, settings):
-    kfold_params = settings['cross_validation']['params']
-    n_jobs = kfold_params.get('n_jobs', 1)
-    n_folds = kfold_params.get('n_folds', 5)
-
-    kf = KFold(X.shape[0], n_folds=n_folds, shuffle=True, random_state=777)
-    scores = Parallel(n_jobs=n_jobs)(
-        delayed(_cv)(X, y, idx_train, idx_test, settings)
-        for idx_train, idx_test in kf
-    )
-
-    return np.array(scores).mean(), np.array(scores).var()
-
-
 def _load_features(f_names):
     X = None
     for f_name in f_names:
