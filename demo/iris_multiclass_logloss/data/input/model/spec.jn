@@ -15,6 +15,7 @@
             "validation": {
                 "class": "ume.cross_validation.kfold",
             },
+            "postprocessing": "postprocessing.change_classname",
         },
         "dataset": {
             "y_train": { "file": "data/working/feat.gen_first_two.npz", "name": "y" },

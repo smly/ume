@@ -24,6 +24,7 @@ The model in ume framework is defined with jsonnet.
             "validation": {
                 "class": "ume.cross_validation.kfold",
             },
+            "postprocessing": "postprocessing.change_classname",
         },
         "dataset": {
             "y_train": { "file": "data/working/feat.gen_first_two.npz", "name": "y" },
@@ -36,7 +37,7 @@ The model in ume framework is defined with jsonnet.
 
 ### model parameter file (data/input/model/v3_linear_model_plus_pca.jn):
 
-```
+```json
 import "spec.jn" {
     "model": {
         "class": "sklearn.linear_model.LogisticRegression",
@@ -105,7 +106,7 @@ $ ume predict -m data/input/model/v3_linear_model_plus_pca.jn
           intercept_scaling=1, penalty='l2', random_state=None, tol=0.0001), X: (100, 5)
 
 $ head data/output/v3_linear_model_plus_pca.jn.csv
-Id,Class_1,Class_2,Class_3
+Id,setosa,versicolor,virginica
 Line92,0.0026394938366868593,0.9938190645282173,0.0035414416350957995
 Line28,0.8975356911214508,0.1024643087765222,1.0202702293242527e-10
 Line78,0.0004463584219969818,0.8518054446852529,0.14774819689275007
