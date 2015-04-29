@@ -1,0 +1,25 @@
+/*
+  Task description
+  ----------------
+  Title: iris dataset demo
+  Metrics: AUC
+  Task: Binary-class classification
+*/
+{
+    "task": {
+        "class": "ume.task.BinaryClassPredictProba",
+        "params": {
+            "metrics": {
+                "method": "sklearn.metrics.roc_auc_score",
+            },
+            "validation": {
+                "class": "ume.cross_validation.kfold",
+            },
+        },
+        "dataset": {
+            "y_train": { "file": "data/working/feat.gen_first_two.npz", "name": "y" },
+            "id_train": { "file": "data/working/feat.gen_first_two.npz", "name": "id_train" },
+            "id_test": { "file": "data/working/feat.gen_first_two.npz", "name": "id_test" },
+        },
+    },
+}

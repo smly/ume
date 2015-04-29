@@ -185,7 +185,8 @@ class TaskSpec(object):
         y = y.reshape(y.size)
 
         cv_method_name = self._conf['task']['params']['validation']['class']
-        cv_params_name = self._conf['task']['params']['validation']['params']
+        cv_params_name = self._conf['task']['params']['validation'].get(
+            'params', {})
         cv_params_name = _to_str_value(cv_params_name)
 
         cv_method = dynamic_load(cv_method_name)
@@ -316,6 +317,44 @@ class DebugMultiClassPredictProba(TaskSpec):
         df = pd.DataFrame(y_pred, columns=[
             'Class_{0}'.format(i + 1)
             for i in range(y_pred.shape[1])])
+        df['Id'] = test_ids.reshape(len(test_ids)).tolist()
+        df.set_index('Id').to_csv(output_fn)
+
+
+class BinaryClassPredictProba(TaskSpec):
+    def __init__(self, jn):
+        self.required = ['features', 'model', 'task']
+
+        # Load jsonnet config
+        TaskSpec.__init__(self, jn)
+
+        # Check fields
+        for field in self.required:
+            if field not in self._conf.keys():
+                raise RuntimeError("Required field: {0}".format(field))
+
+    def solve(self, X_train, y_train, X_test):
+        clf = self._load_model()
+        l.info("Clf: {0}, X: {1}".format(str(clf), str(X_train.shape)))
+        clf.fit(X_train, y_train)
+        preds = clf.predict_proba(X_test)
+        del clf
+        return preds[:, 1]
+
+    def _create_submission(self, output_fn):
+        X_orig = make_X_from_features(self._conf)
+        train_ids = load_array(self._conf, 'task.dataset.id_train')
+        test_ids = load_array(self._conf, 'task.dataset.id_test')
+        train_sz = len(train_ids)
+        test_sz = len(test_ids)
+
+        X_train = X_orig[np.array(range(train_sz)), :]
+        X_test = X_orig[np.array(range(train_sz, train_sz + test_sz)), :]
+        y = load_array(self._conf, 'task.dataset.y_train')
+        y = y.reshape(y.size)
+
+        y_pred = self.solve(X_train, y, X_test)
+        df = pd.DataFrame(y_pred, columns=['Proba'])
         df['Id'] = test_ids.reshape(len(test_ids)).tolist()
         df.set_index('Id').to_csv(output_fn)
 

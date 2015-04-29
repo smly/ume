@@ -1,0 +1,28 @@
+import "spec.jn" {
+    "model": {
+        "class": "ume.externals.xgboost.XGBoost",
+        "params": {
+            /* General Parameters */
+            "silent": 2,
+            "nthread": 8,
+            "seed": 999,
+
+            /* Task Parameters */
+            "objective": "multi:softprob",
+            "eval_metric": "mlogloss",
+            "num_class": 3,
+
+            /* Parameter for Tree Booster */
+            "num_round": 10,
+            // "max_depth": 10,
+            // "min_child_weight": 4,
+            // "subsample": 0.9,
+            // "gamma": 1,                 // min loss reduction
+            // "colsample_bytree": 0.8,
+            // "eta": 0.3,
+        }
+    },
+    "features": [
+        "data/working/feat.gen_first_two.npz",
+    ],
+}

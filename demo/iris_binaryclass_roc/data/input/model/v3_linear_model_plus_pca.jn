@@ -1,0 +1,12 @@
+import "spec.jn" {
+    "model": {
+        "class": "sklearn.linear_model.LogisticRegression",
+        "params": {
+            "C": 10.0
+        }
+    },
+    "features": [
+        "data/working/feat.gen_first_two.npz",
+        "data/working/feat.gen_pca.npz",
+    ],
+}
