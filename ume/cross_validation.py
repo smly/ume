@@ -36,7 +36,7 @@ def loocv(X, y, task_class, n_jobs=1):
     return mean_cv_score
 
 
-def kfold(X, y, task_class):
+def kfold(X, y, task_class, n_folds=10, skip_all_zero_target=None):
     task_metrics = task_class._conf['task']['params']['metrics']
     task_method = task_metrics['method']
     metrics = dynamic_load(task_method)
@@ -51,10 +51,13 @@ def kfold(X, y, task_class):
     #    l.info("KFold: ({0}) {1:.4f}".format(kth, score))
     #    cv_scores.append(score)
 
-    kf = KFold(X.shape[0], n_folds=10, shuffle=True, random_state=777)
+    kf = KFold(X.shape[0], n_folds=n_folds, shuffle=True, random_state=777)
     for kth, (train_idx, test_idx) in enumerate(kf):
         X_train, X_test = X[train_idx], X[test_idx]
         y_train, y_test = y[train_idx], y[test_idx]
+        if skip_all_zero_target is not None and (y_train.sum() == 0 or y_test.sum() == 0):
+            continue
+
         y_pred = task_class.solve(X_train, y_train, X_test)
         score = metrics(y_test, y_pred)
         l.info("KFold: ({0}) {1:.4f}".format(kth, score))

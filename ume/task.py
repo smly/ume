@@ -338,8 +338,16 @@ class BinaryClassPredictProba(TaskSpec):
         l.info("Clf: {0}, X: {1}".format(str(clf), str(X_train.shape)))
         clf.fit(X_train, y_train)
         preds = clf.predict_proba(X_test)
+        #try:
+        #    preds = clf.predict_proba(X_test)
+        #except:
+        #    preds = clf.decision_function(X_test)
+
+        if len(preds.shape) > 1 and preds.shape[1] == 2:
+            preds = preds[:, 1]
+
         del clf
-        return preds[:, 1]
+        return preds
 
     def _create_submission(self, output_fn):
         X_orig = make_X_from_features(self._conf)

@@ -24,11 +24,15 @@ if ! [ -e $DST/bin/pyvenv ]; then
   wget https://www.python.org/ftp/python/${VERSION}/Python-${VERSION}.tgz
   tar zxvf Python-${VERSION}.tgz
   cd Python-${VERSION}
-  ./configure --prefix $DST && make && make install
+  ./configure --prefix $DST \
+    --enable-shared \
+    --with-ssl \
+    LDFLAGS=-Wl,-rpath,$DST/lib && make && make install
   popd
 fi
 
 curl -kL https://bootstrap.pypa.io/get-pip.py | $DST/bin/python
+[ $? -ne 0 ] && exit 1
 
 $DST/bin/pip install virtualenv
 $DST/bin/virtualenv venv.py27
@@ -36,7 +40,12 @@ source venv.py27/bin/activate
 
 #$DST/bin/pyvenv venv
 pip install numpy
-[ $? -eq 0 ] && pip install -r requirements.txt
+[ $? -ne 0 ] && exit 1
 
 # seaborn 0.6dev
 pip install https://github.com/mwaskom/seaborn/archive/5debd4fb3793c0325c84616c8d79985d87a40b72.zip
+[ $? -ne 0 ] && exit 1
+
+# Lasagne (master on 2015-05-04)
+pip install https://github.com/Lasagne/Lasagne/archive/0ba05a802df272a3c0264d50519d8edfff61fecc.zip
+pip install 'nolearn>=0.5'

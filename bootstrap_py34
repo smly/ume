@@ -24,7 +24,7 @@ if ! [ -e $DST/bin/pyvenv ]; then
   wget https://www.python.org/ftp/python/${VERSION}/Python-${VERSION}.tgz
   tar zxvf Python-${VERSION}.tgz
   cd Python-${VERSION}
-  ./configure --prefix $DST && make && make install
+  ./configure --prefix $DST --enable-shared && make && make install
   popd
 fi
 
@@ -34,4 +34,4 @@ pip install numpy
 [ $? -eq 0 ] && pip install -r requirements.txt
 
 # seaborn 0.6dev
-pip install https://github.com/mwaskom/seaborn/archive/5debd4fb3793c0325c84616c8d79985d87a40b72.zip
+# pip install https://github.com/mwaskom/seaborn/archive/5debd4fb3793c0325c84616c8d79985d87a40b72.zip

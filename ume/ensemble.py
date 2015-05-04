@@ -1,9 +1,23 @@
 # -*- coding: utf-8 -*-
 from sklearn.ensemble import BaggingRegressor as SK_BaggingRegressor
+from sklearn.ensemble import BaggingClassifier as SK_BaggingClassifier
 from sklearn.base import BaseEstimator
 from ume.utils import dynamic_load
 
 import numpy as np
+
+
+class BaggingClassifier(BaseEstimator):
+    def __init__(self, base_estimator=None, bag_kwargs=None):
+        klass = dynamic_load(base_estimator['class'])
+        svc = klass(**base_estimator['params'])
+        self.__clf = SK_BaggingClassifier(base_estimator=svc, **bag_kwargs)
+
+    def fit(self, X, y):
+        return self.__clf.fit(X, y)
+
+    def predict_proba(self, X):
+        return self.__clf.predict_proba(X)
 
 
 class BaggingRegressor(BaseEstimator):
@@ -98,5 +112,15 @@ class WeightedAverage(BaseEstimator):
             self.__weight[i] * clf.predict(X)
             for i, clf in enumerate(self.__clf_list)
         ]
+
+        return np.sum(ans, axis=0)
+
+    def predict_proba(self, X):
+        ans = []
+        for i, clf in enumerate(self.__clf_list):
+            part = self.__weight[i] * clf.predict_proba(X)
+            if len(part.shape) > 1 and part.shape[1] > 1:
+                part = part[:, 1]
+            ans.append(part.ravel())
 
         return np.sum(ans, axis=0)
