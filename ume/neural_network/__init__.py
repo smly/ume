@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .base import TwoLayerNeuralNetwork
+from ume.neural_network.base import TwoLayerNeuralNetwork
