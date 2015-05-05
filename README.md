@@ -6,6 +6,13 @@ My private framework/toolbox for a data mining task.
 This application's main goal is to provide a framework that is able to increase
 reproducibility and productivity for a data mining competition.
 
+Features
+--------
+
+* Cython bindings for XGBoost and Jsonnet
+* Programmable configuration file defined by Jsonnet
+* Wrapper class for Neural Network
+
 Bootstrapping
 -------------
 
