@@ -35,11 +35,16 @@ curl -kL https://bootstrap.pypa.io/get-pip.py | $DST/bin/python
 [ $? -ne 0 ] && exit 1
 
 $DST/bin/pip install virtualenv
+[ $? -ne 0 ] && exit 1
+
 $DST/bin/virtualenv venv.py27
 source venv.py27/bin/activate
 
 #$DST/bin/pyvenv venv
 pip install numpy
+[ $? -ne 0 ] && exit 1
+
+pip install -r requirements.txt
 [ $? -ne 0 ] && exit 1
 
 # seaborn 0.6dev

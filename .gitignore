@@ -8,3 +8,7 @@ dist
 *.bak
 *.egg-info
 .build
+*.umedb
+*.tar.gz
+venv.py27
+venv.py34

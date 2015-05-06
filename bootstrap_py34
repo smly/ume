@@ -12,26 +12,40 @@
 # * https://github.com/matplotlib/matplotlib/tags
 # * https://github.com/scikit-learn/scikit-learn/tags
 
-DST=`pwd`"/.build/.local"
+DST=`pwd`"/.build.py34/.local"
 VERSION="3.4.3"
 
 if ! [ -e $DST/bin/pyvenv ]; then
   pushd `pwd`
   echo ">>>>> Building Python"
   mkdir -p $DST
-  mkdir -p .build
-  cd .build
+  mkdir -p .build.py34
+  cd .build.py34
   wget https://www.python.org/ftp/python/${VERSION}/Python-${VERSION}.tgz
   tar zxvf Python-${VERSION}.tgz
   cd Python-${VERSION}
-  ./configure --prefix $DST --enable-shared && make && make install
+  ./configure --prefix $DST \
+    --enable-shared \
+    --with-ssl \
+    LDFLAGS=-Wl,-rpath,$DST/lib && make && make install
   popd
 fi
 
-$DST/bin/pyvenv venv
-source venv/bin/activate
+$DST/bin/pyvenv venv.py34
+[ $? -ne 0 ] && exit 1
+
+source venv.py34/bin/activate
+pip install --upgrade pip  # 3.4.3 have pip 6.0.8 (6.1.1 is available)
 pip install numpy
-[ $? -eq 0 ] && pip install -r requirements.txt
+[ $? -ne 0 ] && exit 1
+
+pip install -r requirements.txt
+[ $? -ne 0 ] && exit 1
 
 # seaborn 0.6dev
-# pip install https://github.com/mwaskom/seaborn/archive/5debd4fb3793c0325c84616c8d79985d87a40b72.zip
+pip install https://github.com/mwaskom/seaborn/archive/5debd4fb3793c0325c84616c8d79985d87a40b72.zip
+[ $? -ne 0 ] && exit 1
+
+# Lasagne (master on 2015-05-04)
+pip install https://github.com/Lasagne/Lasagne/archive/0ba05a802df272a3c0264d50519d8edfff61fecc.zip
+pip install 'nolearn>=0.5'
